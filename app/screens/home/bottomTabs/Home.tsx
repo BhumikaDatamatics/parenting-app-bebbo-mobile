@@ -79,7 +79,7 @@ const Home = () => {
             </ShiftFromTopBottom10>
             
           </MainContainer>
-            <DailyHomeNotification/>
+            {/* <DailyHomeNotification/> */}
          
         </ScrollView>
       </View>

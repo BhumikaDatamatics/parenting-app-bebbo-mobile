@@ -1,6 +1,7 @@
 import { articledata } from '@assets/translations/appOfflineData/article';
 import ArticleCategories from '@components/ArticleCategories';
 import FocusAwareStatusBar from '@components/FocusAwareStatusBar';
+import InfiniteScrollList from '@components/InfiniteScrollList';
 import OverlayLoadingComponent from '@components/OverlayLoadingComponent';
 import { ArticleListContainer, ArticleListContent,SearchBox } from '@components/shared/ArticlesStyle';
 import { ButtonContainer, ButtonModal, ButtonPrimary, ButtonRow, ButtonSpacing, ButtonText } from '@components/shared/ButtonGlobal';
@@ -63,7 +64,8 @@ const Articles = ({route, navigation}: Props) => {
       // pass true to make modal visible every time & reload
     setModalVisible(articleModalOpened)
    });
-  const renderArticleItem = (item: typeof filteredData[0], index: number) => (
+  // const renderArticleItem = (item: typeof filteredData[0], index: number) => (
+  const renderArticleItem = ({item, index} : any) => (
       <Pressable onPress={() => { goToArticleDetail(item)}} key={index}>
         {/* <Text>{{item.cover_image}}</Text> */}
         <ArticleListContainer>
@@ -190,7 +192,7 @@ const Articles = ({route, navigation}: Props) => {
     //   setfilteredData(articleData);
     // }
   }
-  
+  // console.log("filtered data ---",filteredData);
   // useFocusEffect(
   //   React.useCallback(() => {
   //     setArticleData(stateArticleData)
@@ -219,7 +221,7 @@ const Articles = ({route, navigation}: Props) => {
       style={{flex:1}}
     >
           <FocusAwareStatusBar animated={true} backgroundColor={headerColor} />
-          <ScrollView nestedScrollEnabled={true}>
+          {/* <ScrollView nestedScrollEnabled={true}> */}
           <TabScreenHeader
             title={t('articleScreenheaderTitle')}
             headerColor={headerColor}
@@ -254,12 +256,16 @@ const Articles = ({route, navigation}: Props) => {
             </SearchBox>
            
               <ArticleCategories borderColor={headerColor} filterOnCategory={setFilteredArticleData} filterArray={filterArray}/>
-              {filteredData.length> 0 ? filteredData.map((item: any, index: number) => {
+              {filteredData.length> 0 ? 
+                <InfiniteScrollList filteredData ={filteredData} renderArticleItem = {renderArticleItem}/> 
+                : null
+              }
+              {/* {filteredData.length> 0 ? filteredData.map((item: any, index: number) => {
                 return renderArticleItem(item, index);
-              }) : setFilteredArticleData([])}
+              }) : setFilteredArticleData([])} */}
               
           </FlexDirCol>
-          </ScrollView>
+          {/* </ScrollView> */}
           <Modal
         animationType="none"
         transparent={true}
