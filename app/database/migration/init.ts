@@ -17,10 +17,10 @@ export const migrateuserRealm = async (oldRealm:any,newRealm: any) => {
     // let deleteresult = newRealm.deleteAll();
     oldChildrenData.map((item: any) => {
      // console.log(getChild(item),"..item..");
-      let createresult = newRealm.create(ChildEntitySchema.name, getChild(item));
+    let createresult = newRealm.create(ChildEntitySchema.name, getChild(item));
       //console.log(createresult,".....createresult...");
     });
-   
+
     }
     // oldmeasurements.forEach(async (element: any) => {
     //     console.log("element--",element);
@@ -36,7 +36,7 @@ export const migrateuserRealm = async (oldRealm:any,newRealm: any) => {
   const getChild = (child:ChildEntity) => {
     return {
       uuid: child.uuid,
-      name: child.name,
+      name: child.childName,
       gender: child.gender,
       photoUri: child.photoUri,
       createdAt: child.createdAt,
