@@ -86,8 +86,9 @@ const child_age = useAppSelector(
         (state: any) =>
           JSON.parse(state.utilsData.taxonomy.allTaxonomyData).parent_gender,
       );
-    let relationshipValue = relationshipData.length>0 && userParentalRoleData.length>0 ? relationshipData.find((o:any) => o.id === userParentalRoleData[0].value):'';
-     
+      console.log(relationshipData,"..relationshipData..")
+    let relationshipValue = relationshipData.length>0 && userParentalRoleData.length>0 ? relationshipData.find((o:any) => String(o.id) === userParentalRoleData[0].value):'';
+    console.log(relationshipValue,"..relationshipValue..")
   // const currentActiveChildId =
   //   allConfigData?.length > 0
   //     ? allConfigData.filter((item) => item.key === 'currentActiveChildId')
@@ -221,7 +222,7 @@ const child_age = useAppSelector(
             <ScrollView style={{height: 'auto'}} nestedScrollEnabled={true}>
               {SortedchildList.length > 0
                 ? SortedchildList.map((item: any, index: number) => {
-                  const genderLocal=(genders?.length>0 && item.gender!="")?genders.find(genderset => genderset.id === item.gender).name:item.gender;
+                  const genderLocal=(genders?.length>0 && item.gender!="")?genders.find(genderset => String(genderset.id) === item.gender).name:item.gender;
                   return renderChildProfile(dispatch, item, index,genderLocal);
                   })
                 : null}

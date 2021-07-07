@@ -44,7 +44,7 @@ const EditParentDetails = ({route,navigation}: Props) => {
     (state: any) =>
       JSON.parse(state.utilsData.taxonomy.allTaxonomyData).parent_gender,
   );
-  let relationshipValue = relationshipData.length>0 && userParentalRoleData!="" ? relationshipData.find((o:any) => o.id === userParentalRoleData):'';
+  let relationshipValue = relationshipData.length>0 && userParentalRoleData!="" ? relationshipData.find((o:any) => String(o.id) === userParentalRoleData):'';
   // console.log(relationshipName,"..relationshipName..");
 
   const actionSheetRef = createRef<any>();
@@ -61,8 +61,15 @@ const EditParentDetails = ({route,navigation}: Props) => {
  
        },[])
   );
-  const saveParentData=async (relationship:string,parentName:any)=>{
-    console.log(typeof(relationship),"typeof")
+  const saveParentData=async (relationship:String,parentName:any)=>{
+    console.log(typeof(relationship),"typeof");
+    var relationshipnew:any=relationship;
+    if (typeof relationshipnew === 'string' || relationshipnew instanceof String){
+      relationship=relationshipnew
+    }
+    else{
+      relationship=String(relationshipnew);
+    }
     let userParentalRole = await dataRealmCommon.updateSettings<ConfigSettingsEntity>(ConfigSettingsSchema, "userParentalRole", relationship);
     let userNames = await dataRealmCommon.updateSettings<ConfigSettingsEntity>(ConfigSettingsSchema, "userName",parentName);
     // console.log(userParentalRole,"..userParentalRole")
@@ -120,7 +127,12 @@ const EditParentDetails = ({route,navigation}: Props) => {
                 <ChildRelationList key={index}>
                   <Pressable
                     onPress={() => {
-                      setRelationship(item.id);
+                      if (typeof item.id === 'string' || item.id instanceof String){
+                        setRelationship(item.id);
+                      }
+                      else{
+                        setRelationship(String(item.id));
+                      }
                       setRelationshipName(item.name);
                       actionSheetRef.current?.hide();
                     }}>
