@@ -19,7 +19,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Heading2, Heading6Bold, ShiftFromBottom5 } from '@styles/typography';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import RNFS from 'react-native-fs';
 import HTML from 'react-native-render-html';
 import { ThemeContext } from 'styled-components/native';
@@ -119,7 +119,8 @@ const DetailsScreen = ({route, navigation}: any) => {
   const categoryData = useAppSelector(
     (state: any) => JSON.parse(state.utilsData.taxonomy.allTaxonomyData).category,
   );
-  const [cover_image,setCoverImage]=useState('');
+  const [cover_image,setCoverImage]=useState({});
+  const [showLoader,setLoader]=useState(false);
   const [filterArray,setFilterArray] = useState([]);
   let fromPage = 'Details';
   useFocusEffect(
@@ -127,22 +128,32 @@ const DetailsScreen = ({route, navigation}: any) => {
       // console.log("details usefocuseffect")
       // filterArray.length = 0;
       const fetchData = async () => {
+        setLoader(true);
         let imageArray= [];
-        imageArray.push({
-           srcUrl: detailDataToUse?.cover_image?.url, 
-           destFolder: destinationFolder, 
-           destFilename: detailDataToUse?.cover_image?.url.split('/').pop()
-       })
-         if (await RNFS.exists(destinationFolder + '/' + detailDataToUse?.cover_image?.url.split('/').pop())) {
-          // console.log("Image already exists");
-          setCoverImage("file://" + destinationFolder + detailDataToUse?.cover_image?.url.split('/').pop());
-        }else {
-        //  console.log("Image already exists");
-        //  console.log(imageArray,"..imageArray..");
-         const imagesDownloadResult = await downloadImages(imageArray);
-        //  console.log(imagesDownloadResult,"..imagesDownloadResult..");
-         setCoverImage("file://" + destinationFolder + detailDataToUse?.cover_image?.url.split('/').pop());
+        if(detailDataToUse && detailDataToUse?.cover_image!="" && detailDataToUse?.cover_image!=null && detailDataToUse?.cover_image!=undefined && detailDataToUse?.cover_image?.url!="" && detailDataToUse?.cover_image?.url!=null && detailDataToUse?.cover_image?.url!=undefined){
+          imageArray.push({
+            srcUrl: detailDataToUse?.cover_image?.url, 
+            destFolder: destinationFolder, 
+            destFilename: detailDataToUse?.cover_image?.url.split('/').pop()
+        })
+          if (await RNFS.exists(destinationFolder + '/' + detailDataToUse?.cover_image?.url.split('/').pop())) {
+           // console.log("Image already exists");
+           setCoverImage({uri :encodeURI("file://" + destinationFolder + detailDataToUse?.cover_image?.url.split('/').pop())});
+           setLoader(false);
+          }else {
+         //  console.log("Image already exists");
+         //  console.log(imageArray,"..imageArray..");
+          const imagesDownloadResult = await downloadImages(imageArray);
+         //  console.log(imagesDownloadResult,"..imagesDownloadResult..");
+          setCoverImage({uri : encodeURI("file://" + destinationFolder + detailDataToUse?.cover_image?.url.split('/').pop())});
+          setLoader(false); 
         }
+        }
+        else{
+          setCoverImage({require:"@assets/trash/defaultArticleImage.png"});
+          setLoader(false);
+        }
+      
       }
       fetchData();
      
@@ -267,12 +278,24 @@ const DetailsScreen = ({route, navigation}: any) => {
                 //   source={require('@assets/trash/defaultArticleImage.png')}
                 // />
             
-                <ProgressiveImage
-                thumbnailSource={require('@assets/trash/defaultArticleImage.png')}
-                source={cover_image ? {uri : cover_image}:require('@assets/trash/defaultArticleImage.png')}
-                style={{width: '100%', height: 200}}
-                resizeMode="cover"
-              />
+              //   <ProgressiveImage
+              //   thumbnailSource={require('@assets/trash/defaultArticleImage.png')}
+              //   source={cover_image ? {uri : cover_image}:require('@assets/trash/defaultArticleImage.png')}
+              //   style={{width: '100%', height: 200}}
+              //   resizeMode="cover"
+              // />
+              <View>
+              {
+                showLoader ?
+                <ActivityIndicator size="small" color="#0000ff"  style={{width: '100%', height: 200}}/>
+                :
+                <Image
+            source={cover_image ? cover_image: require('@assets/trash/defaultArticleImage.png')}
+            style={{width: '100%', height: 200}}
+            resizeMode="cover"
+          />
+              }
+            </View>
               }
             </View>
             <ShareFavButtons  isFavourite={false} backgroundColor={newHeaderColor} />

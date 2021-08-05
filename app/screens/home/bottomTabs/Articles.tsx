@@ -73,12 +73,11 @@ const Articles = ({route, navigation}: Props) => {
       <Pressable onPress={() => { goToArticleDetail(item)}} key={index}>
         {/* <Text>{{item.cover_image}}</Text> */}
         <ArticleListContainer>
-        <ProgressiveImage
-          thumbnailSource={require('@assets/trash/defaultArticleImage.png')}
+        {/* <ProgressiveImage
           source={item.cover_image ? {uri : "file://" + destinationFolder + item.cover_image.url.split('/').pop()}:require('@assets/trash/defaultArticleImage.png')}
           style={styles.cardImage}
           resizeMode="cover"
-        />
+        /> */}
           {/* <Image
             style={styles.cardImage}
            source={item.cover_image ? {uri : "file://" + destinationFolder + item.cover_image.url.split('/').pop()}:require('@assets/trash/defaultArticleImage.png')}
@@ -89,6 +88,18 @@ const Articles = ({route, navigation}: Props) => {
            style={styles.cardImage}
   PlaceholderContent={<ActivityIndicator />}
 />  */}
+  <View>
+              {
+                item.showLoader ?
+                <ActivityIndicator size="small" color="#0000ff"  style={styles.cardImage}/>
+                :
+                <Image
+                source={item.cover_image!="" && item.cover_image!=null && item.cover_image!=undefined && item.cover_image.url!="" && item.cover_image.url!=null && item.cover_image.url!=undefined? item.customSource: require('@assets/trash/defaultArticleImage.png')}
+                style={styles.cardImage}
+            resizeMode="cover"
+          />
+              }
+            </View>
           <ArticleListContent>
             <ShiftFromTopBottom5>
           <Heading6Bold>{ categoryData.filter((x: any) => x.id==item.category)[0].name }</Heading6Bold>

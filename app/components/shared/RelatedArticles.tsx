@@ -4,7 +4,7 @@ import { RelatedArticlesProps } from '@screens/home/DetailsScreen';
 import { Heading2, Heading3, Heading6Bold, ShiftFromTopBottom5 } from '@styles/typography';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View,Text } from 'react-native';
 import styled from 'styled-components/native';
 import { useAppSelector } from '../../../App';
 import { dataRealmCommon } from '../../database/dbquery/dataRealmCommon';
@@ -13,7 +13,7 @@ import downloadImages from '../../downloadImages/ImageStorage';
 import { ArticleHeading, ArticleListContent, RelatedArticleContainer } from './ArticlesStyle';
 import ProgressiveImage from './ProgressiveImage';
 import ShareFavButtons from './ShareFavButtons';
-
+import RNFS from 'react-native-fs';
 const ContainerView = styled.View`
   flex: 1;
   flex-direction: column;
@@ -139,21 +139,35 @@ const RelatedArticles = (props:RelatedArticlesProps) => {
       // console.log("details usefocuseffect")
       // filterArray.length = 0;
       const fetchData = async () => { 
-        console.log("relatedArticleData lebgth--",relatedArticleData.length);
-        let imageArraynew:any= [];
         if(relatedArticleData?.length>0){
-          relatedArticleData.map((item: any, index: number) => {
-          if(item['cover_image'] != "" && item['cover_image'].url != "")
+          relatedArticleData.map(async (item: any, index: number) => {
+          console.log("relatedArticleData lebgth--",item,index);
+          let imageArraynew:any= [];
+          item.showLoader=true;
+          if(item['cover_image'] != "" && item['cover_image'] != null && item['cover_image'] != undefined && item['cover_image'].url != "" && item['cover_image'].url != null && item['cover_image'].url != undefined)
           {
-            imageArraynew.push({
+            if (await RNFS.exists(destinationFolder + '/' + item['cover_image']?.url.split('/').pop())) {
+              item.customSource={uri:encodeURI("file://" + destinationFolder + item['cover_image']?.url.split('/').pop())};
+              item.showLoader=false;
+            }
+            else{
+              imageArraynew.push({
               srcUrl: item['cover_image'].url, 
               destFolder: destinationFolder, 
               destFilename: item['cover_image'].url.split('/').pop()
-          })
+              })
+              let imagesDownloadResult = await downloadImages(imageArraynew);
+              item.customSource={uri :encodeURI("file://" + destinationFolder + item['cover_image']?.url.split('/').pop())};
+              item.showLoader=false;
+            }
+          }
+          else{
+            item.customSource={require:"@assets/trash/defaultArticleImage.png"};
+            item.showLoader=false;
           }
           });
           // console.log(imageArraynew,"..imageArray..");
-          const imagesDownloadResult = await downloadImages(imageArraynew);
+          // const imagesDownloadResult = await downloadImages(imageArraynew);
           // console.log(imagesDownloadResult,"..imagesDownloadResult..");
       }
       }
@@ -186,12 +200,29 @@ const RelatedArticles = (props:RelatedArticlesProps) => {
           // source={item.cover_image ? {uri : "file://" + destinationFolder + ((JSON.parse(item.cover_image).url).split('/').pop())} : require('@assets/trash/defaultArticleImage.png')}
           source={require('@assets/trash/defaultArticleImage.png')}
           style={styles.cardImage}></Image> */}
-           <ProgressiveImage
-          thumbnailSource={require('@assets/trash/defaultArticleImage.png')}
+           {/* <ProgressiveImage
           source={item.cover_image ? {uri : "file://" + destinationFolder + item.cover_image.url.split('/').pop()}:require('@assets/trash/defaultArticleImage.png')}
           style={styles.cardImage}
           resizeMode="cover"
-        />
+        /> */}
+        {/* <ImageLoad
+    style={styles.cardImage}
+    placeholderStyle={styles.cardImage}
+    loadingStyle={{ size: 'small', color: '#000' }}
+    source={item.cover_image ? {uri : "file://" + destinationFolder + item.cover_image.url.split('/').pop()}:require('@assets/trash/defaultArticleImage.png')}
+    /> */}
+     <View>
+              {
+                item.showLoader ?
+                <ActivityIndicator size="small" color="#0000ff"  style={styles.cardImage}/>
+                :
+                <Image
+                source={item.cover_image!="" && item.cover_image!=null && item.cover_image!=undefined && item.cover_image.url!="" && item.cover_image.url!=null && item.cover_image.url!=undefined? item.customSource: require('@assets/trash/defaultArticleImage.png')}
+                style={styles.cardImage}
+            resizeMode="cover"
+          />
+              }
+            </View>
         <View style={{flexDirection:'column',flex:1,justifyContent:'space-between'}}>
           <View style={{minHeight:90,}}>
           <ArticleListContent>

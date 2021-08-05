@@ -205,7 +205,7 @@ const RSsr = {
  monthtag: "mjesec",
  daystag: "dana",
  daytag: "dan",
- defaultChildPrefix: "Dete  ",
+ defaultChildPrefix: "Dete",
  notiOption1: "Obrišite obaveštenje",
  notiOption2: "Obeležite kao pročitano",
  continueInModal: "Nastavite",

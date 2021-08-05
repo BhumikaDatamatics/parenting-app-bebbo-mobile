@@ -20,7 +20,10 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Heading3, Heading4, Heading4Center, Heading5Bold, Heading6Bold, ShiftFromTop5, ShiftFromTopBottom5 } from '@styles/typography';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import RNFS from 'react-native-fs';
 import {
+  ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   Pressable,
@@ -118,6 +121,7 @@ const Activities = ({ route,navigation }: Props) => {
   const [filteredData,setfilteredData] = useState([]);
 
   const setIsModalOpened = async (varkey: any) => {
+    //Alert.alert(String(modalVisible));
     let obj = {key: varkey, value: !modalVisible};
     dispatch(setInfoModalOpened(obj));
     setModalVisible(!modalVisible);
@@ -153,22 +157,45 @@ const Activities = ({ route,navigation }: Props) => {
     // filteredData =filteredData.map( item => ({ ...item, name:item.name }) )
     console.log("filteredData---",filteredData);
     setSelectedChildActivitiesData(filteredData);
-    // console.log(filteredData?.length);
+    console.log(filteredData?.length);
     let imageArray:any=[];
     if(filteredData?.length>0){
-      filteredData.map((item: any, index: number) => {
-        if(item['cover_image'] != "" && item['cover_image'].url != "")
+      filteredData.map(async (item: any, index: number) => {
+        let imageArraynew:any= [];
+        item.showLoader=true;
+        if(item['cover_image'] != "" && item['cover_image'] != null && item['cover_image'] != undefined && item['cover_image'].url != "" && item['cover_image'].url != null && item['cover_image'].url != undefined)
         {
-          imageArray.push({
-              srcUrl: item['cover_image'].url, 
-              destFolder: destinationFolder, 
-              destFilename: item['cover_image'].url.split('/').pop()
-          })
+          if (await RNFS.exists(destinationFolder + '/' + item['cover_image']?.url.split('/').pop())) {
+            item.customSource={uri:encodeURI("file://" + destinationFolder + item['cover_image']?.url.split('/').pop())};
+            item.showLoader=false;
+          }
+          else{
+            imageArraynew.push({
+            srcUrl: item['cover_image'].url, 
+            destFolder: destinationFolder, 
+            destFilename: item['cover_image'].url.split('/').pop()
+            })
+            let imagesDownloadResult = await downloadImages(imageArraynew);
+            item.customSource={uri :encodeURI("file://" + destinationFolder + item['cover_image']?.url.split('/').pop())};
+            item.showLoader=false;
+          }
         }
+        else{
+          item.customSource={require:"@assets/trash/defaultArticleImage.png"};
+          item.showLoader=false;
+        }
+        // if(item['cover_image'] != "" && item['cover_image'].url != "")
+        // {
+        //   imageArray.push({
+        //       srcUrl: item['cover_image'].url, 
+        //       destFolder: destinationFolder, 
+        //       destFilename: item['cover_image'].url.split('/').pop()
+        //   })
+        // }
         });
         // console.log(imageArray,"..imageArray..");
-        const imagesDownloadResult = await downloadImages(imageArray);
-        console.log(imagesDownloadResult,"..imagesDownloadResult..");
+        // const imagesDownloadResult = await downloadImages(imageArray);
+        // console.log(imagesDownloadResult,"..imagesDownloadResult..");
   }
   }
   useFocusEffect(
@@ -272,17 +299,16 @@ const Activities = ({ route,navigation }: Props) => {
   const renderActivityItem = (item: any, index: number) => (
     <Pressable onPress={() => { goToActivityDetail(item)}} key={index}>
       <ArticleListContainer>
-        {/* <Image
+        <Image
           style={styles.cardImage}
-          source={item.imagePath}
+          source={item.cover_image ? { uri: "file://" + destinationFolder + item.cover_image.url.split('/').pop() } : require('@assets/trash/defaultArticleImage.png')}
           resizeMode={'cover'}
-        /> */}
-        <ProgressiveImage
-          thumbnailSource={require('@assets/trash/defaultArticleImage.png')}
+        />
+        {/* <ProgressiveImage
           source={item.cover_image ? { uri: "file://" + destinationFolder + item.cover_image.url.split('/').pop() } : require('@assets/trash/defaultArticleImage.png')}
           style={styles.cardImage}
           resizeMode="cover"
-        />
+        /> */}
         <ArticleListContent>
           <ShiftFromTopBottom5>
             <Heading6Bold>{activityCategoryData.filter((x: any) => x.id == item.activity_category)[0].name}</Heading6Bold>
@@ -302,12 +328,23 @@ const Activities = ({ route,navigation }: Props) => {
           source={require('@assets/trash/card5.jpeg')}
           resizeMode={'cover'}
         /> */}
-        <ProgressiveImage
-          thumbnailSource={require('@assets/trash/defaultArticleImage.png')}
+        {/* <ProgressiveImage
           source={item.cover_image ? { uri: "file://" + destinationFolder + item.cover_image.url.split('/').pop() } : require('@assets/trash/defaultArticleImage.png')}
           style={styles.cardImage}
           resizeMode="cover"
-        />
+        /> */}
+        <View>
+              {
+                item.showLoader ?
+                <ActivityIndicator size="small" color="#0000ff"  style={styles.cardImage}/>
+                :
+                <Image
+                source={item.cover_image!="" && item.cover_image!=null && item.cover_image!=undefined && item.cover_image.url!="" && item.cover_image.url!=null && item.cover_image.url!=undefined? item.customSource: require('@assets/trash/defaultArticleImage.png')}
+                style={styles.cardImage}
+            resizeMode="cover"
+          />
+              }
+            </View>
         <ArticleListContent>
           <ShiftFromTopBottom5>
             <Heading6Bold>{activityCategoryData.filter((x: any) => x.id == item.activity_category)[0].name}</Heading6Bold>

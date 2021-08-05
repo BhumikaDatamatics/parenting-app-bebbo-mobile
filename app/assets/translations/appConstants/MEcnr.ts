@@ -219,7 +219,7 @@ const MEcnr = {
         monthtag: "mjesec",
         daystag: "dana",
         daytag: "dan",
-        defaultChildPrefix: "Dijete  ",
+        defaultChildPrefix: "Dijete",
         notiOption1: "Obrišite obavještenje",
         notiOption2: "Obilježite kao pročitano",
         continueInModal: "Nastavite",

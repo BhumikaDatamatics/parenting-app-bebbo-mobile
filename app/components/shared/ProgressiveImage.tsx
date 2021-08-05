@@ -39,17 +39,17 @@ const ProgressiveImage = (props:any) => {
    return (
     <>
     <View style={styles.container}>
-        <Animated.Image
+        {/* <Animated.Image
           {...props}
           source={thumbnailSource}
           style={[style, { opacity: thumbnailAnimated }]}
           onLoad={handleThumbnailLoad}
           blurRadius={1}
-        />
+        /> */}
         <Animated.Image
           {...props}
           source={source}
-          style={[styles.imageOverlay, { opacity: imageAnimated }, style]}
+          style={[style, { opacity: imageAnimated }, style]}
           onLoad={onImageLoad}
         />
       </View>  
