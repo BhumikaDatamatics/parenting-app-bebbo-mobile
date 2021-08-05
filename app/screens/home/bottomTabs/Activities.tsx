@@ -299,16 +299,28 @@ const Activities = ({ route,navigation }: Props) => {
   const renderActivityItem = (item: any, index: number) => (
     <Pressable onPress={() => { goToActivityDetail(item)}} key={index}>
       <ArticleListContainer>
-        <Image
+        {/* <Image
           style={styles.cardImage}
           source={item.cover_image ? { uri: "file://" + destinationFolder + item.cover_image.url.split('/').pop() } : require('@assets/trash/defaultArticleImage.png')}
           resizeMode={'cover'}
-        />
+        /> */}
         {/* <ProgressiveImage
           source={item.cover_image ? { uri: "file://" + destinationFolder + item.cover_image.url.split('/').pop() } : require('@assets/trash/defaultArticleImage.png')}
           style={styles.cardImage}
           resizeMode="cover"
         /> */}
+         <View>
+              {
+                item.showLoader ?
+                <ActivityIndicator size="small" color="#0000ff"  style={styles.cardImage}/>
+                :
+                <Image
+                style={styles.cardImage}
+                source={item.cover_image ? { uri: "file://" + destinationFolder + item.cover_image.url.split('/').pop() } : require('@assets/trash/defaultArticleImage.png')}
+                resizeMode={'cover'}
+              /> 
+              }
+            </View>
         <ArticleListContent>
           <ShiftFromTopBottom5>
             <Heading6Bold>{activityCategoryData.filter((x: any) => x.id == item.activity_category)[0].name}</Heading6Bold>
