@@ -34,6 +34,8 @@ import { setInfoModalOpened } from '../../../redux/reducers/utilsSlice';
 import { destinationFolder, articleCategoryArray } from '@assets/translations/appOfflineData/apiConstants';
 import ProgressiveImage from '@components/shared/ProgressiveImage';
 import FirstTimeModal from '@components/shared/FirstTimeModal';
+import downloadImages from '../../../downloadImages/ImageStorage';
+import RNFS from 'react-native-fs';
 // import {KeyboardAwareView} from 'react-native-keyboard-aware-view';
 
 type ArticlesNavigationProp = StackNavigationProp<HomeDrawerNavigatorStackParamList>;
@@ -70,8 +72,42 @@ const Articles = ({route, navigation}: Props) => {
   const modalScreenKey = 'IsArticleModalOpened';
   const modalScreenText = 'articleModalText';
   // const renderArticleItem = (item: typeof filteredData[0], index: number) => (
-  const renderArticleItem = ({item, index}) => {
-    // console.log("renderArticleItem-",index)
+    const loadImage=async (item:any)=>{
+      console.log("3loadImage-", item)
+      let imageArraynew: any = [];
+      let newitem:any={};
+                  if (item['cover_image'] != "" && item['cover_image'] != null && item['cover_image'] != undefined && item['cover_image'].url != "" && item['cover_image'].url != null && item['cover_image'].url != undefined) {
+                      if (await RNFS.exists(destinationFolder + '/' + item['cover_image']?.url.split('/').pop())) {
+                        newitem.customSource = { uri: encodeURI("file://" + destinationFolder + item['cover_image']?.url.split('/').pop()) };
+                        newitem.showLoader = false;
+                          console.log("downloaded", item.customSource)
+                          return newitem;
+                      }
+                      else {
+                          imageArraynew.push({
+                              srcUrl: item['cover_image'].url,
+                              destFolder: destinationFolder,
+                              destFilename: item['cover_image'].url.split('/').pop()
+                          })
+                          let imagesDownloadResult = await downloadImages(imageArraynew);
+                          console.log("downloading", item['cover_image'].url)
+                          newitem.customSource = { uri: encodeURI("file://" + destinationFolder + item['cover_image']?.url.split('/').pop()) };
+                          newitem.showLoader = false;
+                          console.log("downloaded2", item.customSource)
+                          return newitem;
+                      }
+                  }
+                  else {
+                    newitem.customSource = { require: "@assets/trash/defaultArticleImage.png" };
+                    newitem.showLoader = false;
+                      return newitem;
+                  }
+  }
+
+  const renderArticleItem =({item, index}) => {
+    item.showLoader = true;
+    // let itemnew = await ;
+    // console.log("renderArticleItem-",itemnew);
     return(
       <Pressable onPress={() => { goToArticleDetail(item)}} key={index}>
         {/* <Text>{{item.cover_image}}</Text> */}
@@ -96,11 +132,12 @@ const Articles = ({route, navigation}: Props) => {
                 item.showLoader ?
                 <ActivityIndicator size="small" color="#0000ff"  style={styles.cardImage}/>
                 :
-                <Image
-                source={item.cover_image!="" && item.cover_image!=null && item.cover_image!=undefined && item.cover_image.url!="" && item.cover_image.url!=null && item.cover_image.url!=undefined? item.customSource: require('@assets/trash/defaultArticleImage.png')}
-                style={styles.cardImage}
-            resizeMode="cover"
-          />
+                <Text>{loadImage(item).customSource}</Text>
+          //       <Image
+          //       source={item.cover_image!="" && item.cover_image!=null && item.cover_image!=undefined && item.cover_image.url!="" && item.cover_image.url!=null && item.cover_image.url!=undefined? loadImage(item).customSource: require('@assets/trash/defaultArticleImage.png')}
+          //       style={styles.cardImage}
+          //   resizeMode="cover"
+          // />
               }
             </View>
           <ArticleListContent>
